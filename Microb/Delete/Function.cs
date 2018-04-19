@@ -6,15 +6,16 @@ using Amazon.Lambda.Core;
 using Newtonsoft.Json;
 
 namespace Microb.Delete {
-    
+
     class Function: MicrobFunction {
-        
+
         //--- Methods ---
         [LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
         public APIGatewayProxyResponse LambdaHandler(APIGatewayProxyRequest request) {
             LambdaLogger.Log(JsonConvert.SerializeObject(request));
+            var id = request.PathParameters["id"];
             try {
-                // TODO Delete an item
+                var result = DeleteItem(id).Result;
                 return new APIGatewayProxyResponse {
                     StatusCode = 200
                 };

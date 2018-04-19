@@ -6,15 +6,17 @@ using Amazon.Lambda.Core;
 using Newtonsoft.Json;
 
 namespace Microb.Update {
-    
+
     class Function: MicrobFunction {
-        
+
         //--- Methods ---
         [LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
         public APIGatewayProxyResponse LambdaHandler(APIGatewayProxyRequest request) {
             LambdaLogger.Log(JsonConvert.SerializeObject(request));
+            var item = JsonConvert.DeserializeObject<MicrobItem>(request.Body);
+            item.id = request.PathParameters["id"];
             try {
-                // TODO Read single item
+                UpdateItem(item.id, item.title, item.content).Wait();
                 return new APIGatewayProxyResponse {
                     StatusCode = 200
                 };

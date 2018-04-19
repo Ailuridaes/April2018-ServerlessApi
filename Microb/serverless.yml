@@ -8,28 +8,29 @@ provider:
   versionFunctions: false
   stage: dev
   region: us-east-1
-#  iamRoleStatements:
-#    - Effect: Allow
-#      Action:
-#        - # TODO Add permissions to interact with DynamoDB
-#      Resource:
-#        - Fn::GetAtt: [ DynamoDBTable, Arn ]
-#        - Fn::Join: ["/", [ Fn::GetAtt: [DynamoDBTable, Arn], "index", "*"]]
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+
+      Resource:
+        - Fn::GetAtt: [ DynamoDBTable, Arn ]
+        - Fn::Join: ["/", [ Fn::GetAtt: [DynamoDBTable, Arn], "index", "*"]]
 
 # you can define service wide environment variables here
   environment:
     STAGE_NAME: ${self:custom.stageName}
-#    DYNAMO_TABLE_NAME:
-#      Ref: # TODO Reference the CloudFormation dynamo table here
+    DYNAMO_TABLE_NAME:
+      Ref: DynamoDBTable
 
 # Custom values that can be referenced in the Cloud Formation template
 custom:
   stageName: ${opt:stage, self:provider.stage}
-  
-  
+
+
 package:
   artifact: bin/release/netcoreapp2.0/deploy-package.zip
-  
+
 
 functions:
 
@@ -40,11 +41,33 @@ functions:
       - http:
           path: "items"
           method: "get"
-
-  # TODO Add missing functions (Create, Read, Update, Delete)
+  create-microb:
+    handler: ServerlessApi::Microb.Create.Function::LambdaHandler # Assembly::Namespace.ClassName::MethodName
+    events:
+      - http:
+          path: "items"
+          method: "post"
+  read-microb:
+    handler: ServerlessApi::Microb.Read.Function::LambdaHandler # Assembly::Namespace.ClassName::MethodName
+    events:
+      - http:
+          path: "items/{id}"
+          method: "get"
+  update-microb:
+    handler: ServerlessApi::Microb.Update.Function::LambdaHandler # Assembly::Namespace.ClassName::MethodName
+    events:
+      - http:
+          path: "items/{id}"
+          method: "put"
+  delete-microb:
+    handler: ServerlessApi::Microb.Delete.Function::LambdaHandler # Assembly::Namespace.ClassName::MethodName
+    events:
+      - http:
+          path: "items/{id}"
+          method: "delete"
 
 # you can add CloudFormation resource templates here
-#resources:
-#  Parameters: # TODO include the parameter section from the infrastructure/microb-table_cfn.yml file
-#  Resources:
-#    DynamoDBTable: # TODO include the DynamoDBTable section from the infrastructure/microb-table_cfn.yml file
+resources:
+ Parameters: ${file(./infrastructure/microb-table_cfn.yml):Parameters} # TODO include the parameter section from the infrastructure/microb-table_cfn.yml file
+ Resources: ${file(./infrastructure/microb-table_cfn.yml):Resources}
+#   DynamoDBTable: :DynamoDBTable} # TODO include the DynamoDBTable section from the infrastructure/microb-table_cfn.yml file

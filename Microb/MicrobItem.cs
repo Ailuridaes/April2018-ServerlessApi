@@ -4,5 +4,5 @@
         public string content { get; set; }
         public string date { get; set; }
         public string id { get; set; }
-    } 
+    }
 }

@@ -8,17 +8,17 @@ using Amazon.Lambda.Core;
 using Newtonsoft.Json;
 
 namespace Microb.List {
-    
+
     class Function: MicrobFunction {
-        
+
         //--- Methods ---
         [LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
         public APIGatewayProxyResponse LambdaHandler(APIGatewayProxyRequest request) {
             LambdaLogger.Log(JsonConvert.SerializeObject(request));
             try {
-                // TODO List an item
+                var items = JsonConvert.SerializeObject(GetItems().Result);
                 return new APIGatewayProxyResponse {
-                    Body = "{\"title\": \"Hello API Gateway!\", \"content\": \"foo bar\"}",
+                    Body = items,
                     StatusCode = 200
                 };
             }

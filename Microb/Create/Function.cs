@@ -6,17 +6,20 @@ using Amazon.Lambda.Core;
 using Newtonsoft.Json;
 
 namespace Microb.Create {
-    
+
     class Function: MicrobFunction {
-        
+
         //--- Methods ---
         [LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
         public APIGatewayProxyResponse LambdaHandler(APIGatewayProxyRequest request) {
             LambdaLogger.Log(JsonConvert.SerializeObject(request));
+            var body = JsonConvert.DeserializeObject<MicrobItem>(request.Body);
+            LambdaLogger.Log(JsonConvert.SerializeObject(body));
             try {
-                // TODO Create an item
+                var item = CreateItem(body.title.ToString(), body.content.ToString()).Result;
                 return new APIGatewayProxyResponse {
-                    StatusCode = 200
+                    StatusCode = 200,
+                    Body = JsonConvert.SerializeObject(item)
                 };
             }
             catch (Exception e) {
@@ -28,7 +31,7 @@ namespace Microb.Create {
             }
         }
 
-        private async Task<string> CreateItem(string title, string content) {
+        private async Task<MicrobItem> CreateItem(string title, string content) {
             var id = Guid.NewGuid().ToString();
             var now = DateTime.Now.ToString("MM/dd/yyyy h:mm tt");
             var item = new Document();
@@ -38,7 +41,13 @@ namespace Microb.Create {
             item["DateCreated"] = now;
             await _table.PutItemAsync(item);
             LambdaLogger.Log($"*** INFO: Created item {id}");
-            return id;
+            var response = new MicrobItem {
+                id = id,
+                title = title,
+                content = content,
+                date = now
+            };
+            return response;
         }
     }
 }

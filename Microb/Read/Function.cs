@@ -5,17 +5,19 @@ using Amazon.Lambda.Core;
 using Newtonsoft.Json;
 
 namespace Microb.Read {
-    
+
     class Function: MicrobFunction {
-        
+
         //--- Methods ---
         [LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
         public APIGatewayProxyResponse LambdaHandler(APIGatewayProxyRequest request) {
             LambdaLogger.Log(JsonConvert.SerializeObject(request));
             try {
-                // TODO Read single item
+                var id = request.PathParameters["id"];
+                var item = JsonConvert.SerializeObject(GetItem(id).Result);
                 return new APIGatewayProxyResponse {
-                    StatusCode = 200
+                    StatusCode = 200,
+                    Body = item
                 };
             }
             catch (Exception e) {

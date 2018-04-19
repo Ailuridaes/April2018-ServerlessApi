@@ -4,7 +4,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.Lambda.Core;
 
 namespace Microb {
-    
+
     public class MicrobFunction {
 
         //--- Fields ---
@@ -13,7 +13,7 @@ namespace Microb {
         protected readonly RegionEndpoint _regionEndpoint;
         protected readonly AmazonDynamoDBClient _dynamoClient;
         protected readonly Table _table;
-        
+
         //--- Constructors ---
         public MicrobFunction() {
             _tableName = System.Environment.GetEnvironmentVariable("DYNAMO_TABLE_NAME");
